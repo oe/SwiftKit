@@ -8,8 +8,10 @@
 import Foundation
 
 extension RandomAccessCollection where Element: Identifiable {
-  // add contains to Array, Set and Anything like them
-  //  usage: arr.contains(item)
+  
+  /// check whether an element is included in a  collection
+  /// - Parameter element: element should conforms to ``Identifiable``
+  /// - Returns: true for found
   func contains(_ element: Element) -> Bool {
     self.contains { item in
       item[keyPath: \.id] == element[keyPath: \.id]
