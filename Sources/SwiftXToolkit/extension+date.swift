@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Date {
+public extension Date {
   
   /// create Date from ios8601 style time string
   ///
@@ -64,7 +64,7 @@ public enum DateStringFormat {
   case relative(RelativeDateTimeFormatter.UnitsStyle?);
 }
 
-extension DateFormatter {
+public extension DateFormatter {
   
   /// create a DateFormatter via format string
   ///

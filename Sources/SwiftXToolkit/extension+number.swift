@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Double {
+public extension Double {
   
   /// convert to Date in timestamp(second) format
   ///
@@ -21,7 +21,7 @@ extension Double {
   }
 }
 
-extension Int {
+public extension Int {
   /// convert to Date in timestamp(second) format
   ///
   /// ```swift

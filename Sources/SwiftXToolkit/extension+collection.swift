@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension RandomAccessCollection where Element: Identifiable {
+public extension RandomAccessCollection where Element: Identifiable {
   
   /// check whether an element is included in a  collection
   /// - Parameter element: element should conforms to ``Identifiable``

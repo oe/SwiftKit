@@ -31,9 +31,9 @@ import Foundation
 ///
 /// print(products)
 /// ```
-struct FailableDecodable<Base : Decodable> : Decodable {
+public struct FailableDecodable<Base : Decodable> : Decodable {
   let value: Base?
-  init(from decoder: Decoder) throws {
+  public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
     self.value = try? container.decode(Base.self)
   }

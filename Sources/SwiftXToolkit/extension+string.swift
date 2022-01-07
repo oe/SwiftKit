@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension String {
+public extension String {
   
   /// check string contains parts of string, case insensitive
   ///
