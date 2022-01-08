@@ -34,7 +34,7 @@ public extension String {
   /// ```
   /// - Parameter format: data format that string is using, like "YYYY/MM/DD
   /// - Returns: date instance
-  func toDate(foramt stringFormat: String2DateFormat) -> Date? {
+  func toDate(format stringFormat: String2DateFormat) -> Date? {
     switch stringFormat {
       case .iso8601:
         let iso8601Formmater = ISO8601DateFormatter()
