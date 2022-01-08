@@ -39,7 +39,7 @@ public extension String {
       case .iso8601:
         let iso8601Formmater = ISO8601DateFormatter()
         return iso8601Formmater.date(from: self)
-      case .normal(let format, let locale):
+      case .format(let format, let locale):
         let dateFormatter = DateFormatter(format: format, locale: locale)
         return dateFormatter.date(from: self)
     }
@@ -50,7 +50,7 @@ public extension String {
     // standard iso8601 format
     case iso8601
     // normal date string format
-    case normal(format: String, locale: String? = nil)
+    case format(_ format: String, locale: String? = nil)
   }
   
   

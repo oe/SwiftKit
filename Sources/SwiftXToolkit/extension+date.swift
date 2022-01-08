@@ -59,7 +59,7 @@ public extension Date {
 /// date string format
 public enum DateStringFormat {
   /** normal  `YYYY/MM/DD` format */
-  case format(format: String, locale: String? = nil)
+  case format(_ format: String, locale: String? = nil)
   /** relative time in ``RelativeDateTimeFormatter`` */
   case relative(RelativeDateTimeFormatter.UnitsStyle?)
 }
