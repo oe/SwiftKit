@@ -12,24 +12,28 @@ public extension Double {
   /// convert to Date in timestamp(second) format
   ///
   /// ```swift
-  /// let time: Double = 123665566
+  /// let time: Double = 1641632605312
   /// let date = time.toDate()
   /// ```
+  /// - Parameter isMillisecond: whether time is in millisecond format, such as javascript timestamp
   /// - Returns: Date Object
-  func toDate() -> Date {
-    Date(timeIntervalSince1970: self)
+  func toDate(isMillisecond: Bool = false) -> Date {
+
+    Date(timeIntervalSince1970: isMillisecond ? self / 1000 : self)
   }
 }
 
 public extension Int {
   /// convert to Date in timestamp(second) format
   ///
+  /// be aware, on Latest Apple device, Int should be Int64
   /// ```swift
-  /// let time = 123665566
+  /// let time = 1641632605312
   /// let date = time.toDate()
   /// ```
+  /// - Parameter isMillisecond: whether time is in millisecond format, such as javascript timestamp
   /// - Returns: Date Object
-  func toDate() -> Date {
-    Date(timeIntervalSince1970: TimeInterval(self))
+  func toDate(isMillisecond: Bool = false) -> Date {
+    Date(timeIntervalSince1970: TimeInterval(isMillisecond ? self / 1000 : self))
   }
 }
