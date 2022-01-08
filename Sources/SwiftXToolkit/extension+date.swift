@@ -44,8 +44,8 @@ public extension Date {
   /// - Returns: formatted string
   func toString(_ format: DateStringFormat) -> String {
     switch format {
-      case .format(let dateFormat):
-        let dateFormatter = DateFormatter(dateFormat: dateFormat)
+      case .format(let dateFormat, let locale):
+        let dateFormatter = DateFormatter(format: dateFormat, locale: locale)
         return dateFormatter.string(from: self)
       case .relative(let style):
         let formatter = RelativeDateTimeFormatter()
@@ -59,9 +59,9 @@ public extension Date {
 /// date string format
 public enum DateStringFormat {
   /** normal  `YYYY/MM/DD` format */
-  case format(String);
+  case format(format: String, locale: String? = nil)
   /** relative time in ``RelativeDateTimeFormatter`` */
-  case relative(RelativeDateTimeFormatter.UnitsStyle?);
+  case relative(RelativeDateTimeFormatter.UnitsStyle?)
 }
 
 public extension DateFormatter {
@@ -69,11 +69,16 @@ public extension DateFormatter {
   /// create a DateFormatter via format string
   ///
   /// ```swift
-  /// let formatter = DateFormatter(dateFormat: "YYYY/MM/DD")
+  /// let formatter = DateFormatter(dateFormat: "YYYY/MM/DD", "zh_CN")
   /// ```
-  /// - Parameter dateFormat: format string, like YYYY/MM/DD
-  convenience init(dateFormat: String) {
+  /// - Parameters:
+  ///   - format: format string, like YYYY/MM/DD
+  ///   - locale: locale identifier for ``Locale``
+  convenience init(format: String, locale: String? = nil) {
     self.init()
-    self.dateFormat = dateFormat
+    self.dateFormat = format
+    if let locale = locale {
+      self.locale = Locale(identifier: locale)
+    }
   }
 }

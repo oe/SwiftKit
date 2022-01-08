@@ -34,9 +34,23 @@ public extension String {
   /// ```
   /// - Parameter format: data format that string is using, like "YYYY/MM/DD
   /// - Returns: date instance
-  func toDate(format: String) -> Date? {
-    let dateFormatter = DateFormatter(dateFormat: format)
-    return dateFormatter.date(from: self)
+  func toDate(foramt stringFormat: String2DateFormat) -> Date? {
+    switch stringFormat {
+      case .iso8601:
+        let iso8601Formmater = ISO8601DateFormatter()
+        return iso8601Formmater.date(from: self)
+      case .normal(let format, let locale):
+        let dateFormatter = DateFormatter(format: format, locale: locale)
+        return dateFormatter.date(from: self)
+    }
+  }
+  
+  /// format for string that can convert to Date
+  enum String2DateFormat {
+    // standard iso8601 format
+    case iso8601
+    // normal date string format
+    case normal(format: String, locale: String? = nil)
   }
   
   
