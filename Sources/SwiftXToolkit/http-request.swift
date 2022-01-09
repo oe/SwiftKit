@@ -112,11 +112,14 @@ public struct HTTPRequestPayload {
 
 public enum HTTPRequestError: Error {
   case invalidURL
+  case invalidStatusCode(code: Int, body: String?)
   case malformedBody
 }
 
 
 public enum HTTPRequest {
+  
+  public typealias CustomDecoder = ( _ decoder: JSONDecoder) -> Void
   
   /// request with an url string
   ///
@@ -134,11 +137,11 @@ public enum HTTPRequest {
   /// ```
   ///
   /// - Returns: request result
-  public static func request<T: Decodable>(_ url: String) async throws -> T {
+  public static func request<T: Decodable>(_ url: String, decoder: CustomDecoder? = nil) async throws -> T {
     guard let requestUrl = URL(string: url) else {
       throw HTTPRequestError.invalidURL
     }
-    return try await request(requestUrl)
+    return try await request(requestUrl, decoder: decoder)
   }
   
   
@@ -158,8 +161,8 @@ public enum HTTPRequest {
   /// ```
   ///
   /// - Returns: request result
-  public static func request<T: Decodable>(_ url: URL) async throws -> T {
-    return try await request(HTTPRequestPayload(url: url))
+  public static func request<T: Decodable>(_ url: URL, decoder: CustomDecoder? = nil) async throws -> T {
+    return try await request(HTTPRequestPayload(url: url), decoder: decoder)
   }
   
   
@@ -182,10 +185,21 @@ public enum HTTPRequest {
   /// ```
   ///
   /// - Returns: request result
-  public static func request<T: Decodable>(_ payload: HTTPRequestPayload) async throws -> T {
+  public static func request<T: Decodable>(_ payload: HTTPRequestPayload, decoder customDecoder: CustomDecoder? = nil) async throws -> T {
     do {
-      let (data, _) = try await URLSession.shared.data(for: payload.toURLRequest())
-      return try JSONDecoder().decode(T.self, from: data)
+      let (data, response) = try await URLSession.shared.data(for: payload.toURLRequest())
+      
+      if let httpResponse = response as? HTTPURLResponse {
+        if !(200...299).contains(httpResponse.statusCode) {
+          throw HTTPRequestError.invalidStatusCode(code: httpResponse.statusCode, body: String(data: data, encoding: .utf8))
+        }
+      }
+      
+      let jsonDecoder = JSONDecoder()
+      if let customDecoder = customDecoder {
+        customDecoder(jsonDecoder)
+      }
+      return try jsonDecoder.decode(T.self, from: data)
     } catch {
       throw error
     }

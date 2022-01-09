@@ -21,4 +21,24 @@ final class XiuToolkitTests: XCTestCase {
     let meta: IUserMeta = try await HTTPRequest.request(requestPayload)
     XCTAssertEqual(meta.page, 1)
   }
+  
+  struct INPMMeta: Decodable {
+    var analyzedAt: Date
+  }
+  func testFetchCustomDecoder() async throws {
+    let requestPayload = HTTPRequestPayload(url: URL(string: "https://api.npms.io/v2/package/react")!)
+    print(requestPayload.body ?? "no body provide")
+    let meta: INPMMeta = try await HTTPRequest.request(requestPayload) { decoder in
+      decoder.dateDecodingStrategy = .custom({ (decoder) -> Date in
+        let container = try decoder.singleValueContainer()
+        let dateStr = try container.decode(String.self)
+        let isoFormatter = ISO8601DateFormatter()
+        // "2022-01-09T00:11:09.676Z" is iso8601 with fractional seconds
+        isoFormatter.formatOptions.insert(.withFractionalSeconds)
+        return isoFormatter.date(from: dateStr)!
+      })
+    }
+    let dateString = meta.analyzedAt.toString(.format("EEEE, MMM d, yyyy", locale: "zh-TW"))
+    XCTAssertNotEqual(dateString, "")
+  }
 }
