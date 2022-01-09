@@ -18,7 +18,6 @@ public extension Double {
   /// - Parameter isMillisecond: whether time is in millisecond format, such as javascript timestamp
   /// - Returns: Date Object
   func toDate(isMillisecond: Bool = false) -> Date {
-
     Date(timeIntervalSince1970: isMillisecond ? self / 1000 : self)
   }
 }
