@@ -35,29 +35,6 @@ public enum HTTPRequestMethod {
 
 /// common http request payload
 public struct HTTPRequestPayload {
-  /// init with standard parameters
-  public init(url: URL, method: HTTPRequestMethod? = nil, qs: [String : String]? = nil, headers: [String : String]? = nil, body: Data? = nil, json: Bool? = nil) {
-    self.url = url
-    self.method = method
-    self.qs = qs
-    self.headers = headers
-    self.body = body
-    self.json = json
-  }
-  
-  
-  /// init with encodable body
-  public init<T: Encodable>(url: URL, method: HTTPRequestMethod? = nil, qs: [String : String]? = nil, headers: [String : String]? = nil, body: T? = nil, json: Bool? = nil) throws {
-    if let body = body {
-      guard let bodyData = try? JSONEncoder().encode(body) else {
-        throw HTTPRequestError.malformedBody
-      }
-      self.init(url: url, method: method, qs: qs, headers: headers, body: bodyData, json: json)
-    } else {
-      self.init(url: url, method: method, qs: qs, headers: headers, body: nil, json: json)
-    }
-  }
-  
   /// URL target
   public var url: URL
   /// request method, default to get
@@ -70,6 +47,32 @@ public struct HTTPRequestPayload {
   public var body: Data?
   /// use json request, add accept/content-type header automaticlly
   public var json: Bool?
+  /// timeout in senconds, default to 60s internal
+  public var timeout: TimeInterval?
+  
+  /// init with standard parameters
+  public init(url: URL, method: HTTPRequestMethod? = nil, qs: [String : String]? = nil, headers: [String : String]? = nil, body: Data? = nil, json: Bool? = nil, timeout: TimeInterval? = nil) {
+    self.url = url
+    self.method = method
+    self.qs = qs
+    self.headers = headers
+    self.body = body
+    self.json = json
+    self.timeout = timeout
+  }
+  
+  
+  /// init with encodable body
+  public init<T: Encodable>(url: URL, method: HTTPRequestMethod? = nil, qs: [String : String]? = nil, headers: [String : String]? = nil, body: T? = nil, json: Bool? = nil, timeout: TimeInterval? = nil) throws {
+    if let body = body {
+      guard let bodyData = try? JSONEncoder().encode(body) else {
+        throw HTTPRequestError.malformedBody
+      }
+      self.init(url: url, method: method, qs: qs, headers: headers, body: bodyData, json: json, timeout: timeout)
+    } else {
+      self.init(url: url, method: method, qs: qs, headers: headers, body: nil, json: json, timeout: timeout)
+    }
+  }
   
   /// convert to an URLRequest object which can be used in http request
   public func toURLRequest() -> URLRequest {
@@ -187,14 +190,8 @@ public enum HTTPRequest {
   /// - Returns: request result
   public static func request<T: Decodable>(_ payload: HTTPRequestPayload, decoder customDecoder: CustomDecoder? = nil) async throws -> T {
     do {
-      let (data, response) = try await URLSession.shared.data(for: payload.toURLRequest())
-      
-      if let httpResponse = response as? HTTPURLResponse {
-        if !(200...299).contains(httpResponse.statusCode) {
-          throw HTTPRequestError.invalidStatusCode(code: httpResponse.statusCode, body: String(data: data, encoding: .utf8))
-        }
-      }
-      
+      let (data, _) = try await requestInner(payload)
+
       let jsonDecoder = JSONDecoder()
       if let customDecoder = customDecoder {
         customDecoder(jsonDecoder)
@@ -203,5 +200,45 @@ public enum HTTPRequest {
     } catch {
       throw error
     }
+  }
+  
+  
+  /// get string an decode in correct text encoding
+  /// - Parameter payload: request params
+  /// - Returns: string
+  public static func request(_ payload: HTTPRequestPayload) async throws -> String {
+    let (data, response) = try await requestInner(payload)
+    var encoding: String.Encoding = .utf8
+    if let textEncodingName = response.textEncodingName {
+      let cfe = CFStringConvertIANACharSetNameToEncoding(textEncodingName as CFString)
+      if cfe != kCFStringEncodingInvalidId {
+        let se = CFStringConvertEncodingToNSStringEncoding(cfe)
+        encoding = String.Encoding(rawValue: se)
+      }
+    }
+    guard let result = String(data: data, encoding: encoding) else {
+      throw HTTPRequestError.malformedBody
+    }
+    return  result
+  }
+  
+  
+  /// get raw binary data for image/file situations
+  /// - Parameter payload: request params
+  /// - Returns: binary
+  public static func request(_ payload: HTTPRequestPayload) async throws -> (Data, URLResponse) {
+    return try await requestInner(payload)
+  }
+  
+  
+  private static func requestInner(_ payload: HTTPRequestPayload) async throws -> (Data, URLResponse) {
+    let (data, response) = try await URLSession.shared.data(for: payload.toURLRequest())
+    
+    if let httpResponse = response as? HTTPURLResponse {
+      if !(200...299).contains(httpResponse.statusCode) {
+        throw HTTPRequestError.invalidStatusCode(code: httpResponse.statusCode, body: String(data: data, encoding: .utf8))
+      }
+    }
+    return (data, response)
   }
 }
