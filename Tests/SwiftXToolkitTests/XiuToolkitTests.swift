@@ -41,4 +41,15 @@ final class XiuToolkitTests: XCTestCase {
     let dateString = meta.analyzedAt.toString(.format("EEEE, MMM d, yyyy", locale: "zh-TW"))
     XCTAssertNotEqual(dateString, "")
   }
+  
+  struct User: Equatable, Hashable, Identifiable {
+    var id: String
+    var name: String
+  }
+  
+  func testArrayUnique() {
+    XCTAssertEqual([1,2,3,2,3].uniqued(), [1,2,3])
+    
+    XCTAssertEqual([User(id: "1", name: "Saiya"), User(id: "1", name: "aaa")].uniqued(), [User(id: "1", name: "Saiya")])
+  }
 }

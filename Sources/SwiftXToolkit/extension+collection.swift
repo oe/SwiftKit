@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension RandomAccessCollection where Element: Identifiable {
+public extension Sequence where Element: Identifiable {
   
   /// check whether an element is included in a  collection
   /// - Parameter element: element should conforms to ``Identifiable``
@@ -16,5 +16,10 @@ public extension RandomAccessCollection where Element: Identifiable {
     self.contains { item in
       item[keyPath: \.id] == element[keyPath: \.id]
     }
+  }
+  
+  func uniqued() -> [Element] {
+    var seen: Set<Element.ID> = []
+    return filter { seen.insert($0[keyPath: \.id]).inserted }
   }
 }
