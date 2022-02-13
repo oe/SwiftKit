@@ -25,6 +25,21 @@ public extension String {
     return true
   }
   
+  /// all chars unicode point accumulation
+  /// empty string result in 0
+  var unicodePoint: Int {
+    var total: Int = 0
+    for v in self.unicodeScalars {
+      // handling overflow adding
+      total &+= Int(v.value)
+      if total < 0 {
+        total += Int.max
+      }
+      
+    }
+    return total
+  }
+  
   
   /// convert string to Date object
   ///

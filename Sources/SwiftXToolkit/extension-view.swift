@@ -28,4 +28,16 @@ public extension View {
         }
     }
   }
+  
+  
+  @ViewBuilder
+  /// add conditional modifier
+  /// - Returns: some view
+  func `if`<Content: View>(_ condition: @autoclosure () -> Bool, content: (Self) -> Content) -> some View {
+    if condition() {
+      content(self)
+    } else {
+      self
+    }
+  }
 }
