@@ -18,8 +18,19 @@ public extension Sequence where Element: Identifiable {
     }
   }
   
+  /// Get uniqued sequence when element is identificable
   func uniqued() -> [Element] {
     var seen: Set<Element.ID> = []
     return filter { seen.insert($0[keyPath: \.id]).inserted }
   }
+
 }
+
+//public extension Sequence where Element: Hashable {
+//  
+//  /// Get uniqued sequence when element is hashable
+//  func uniqued() -> [Element] {
+//    var seen: Set<Element> = []
+//    return filter { seen.insert($0).inserted }
+//  }
+//}

@@ -15,7 +15,7 @@ public extension Date {
   /// let date = Date(iso8601: "2006-10-24T07:00:00Z")
   /// ```
   /// - Parameter iso8601: iso8601 style  time string
-  init?(iso8601:String) {
+  init?(iso8601: String) {
     if let date = Date.iso8601Formatter.date(from: iso8601) {
       self = date
     } else {
