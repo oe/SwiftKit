@@ -1,5 +1,5 @@
 import XCTest
-import SwiftXToolkit
+import SwiftKit
 
 final class XiuToolkitTests: XCTestCase {
   func testExample() throws {

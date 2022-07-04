@@ -5,7 +5,7 @@ A swift package for personal use(updating while my swift skills improving)
 available for > macOS12 and > iOS15
 
 ## Installation
-click menu `File` -> `Add Packages...`, then input `https://github.com/oe/SwiftXToolkit`
+click menu `File` -> `Add Packages...`, then input `https://github.com/oe/SwiftKit`
 
 
 ## Features
