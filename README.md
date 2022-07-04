@@ -1,4 +1,4 @@
-# SwiftXToolkit
+# SwiftKit
 
 A swift package for personal use(updating while my swift skills improving)
 
