@@ -175,7 +175,7 @@ public enum HTTPRequest {
       data
     }
 
-    public func text() -> String? {
+    public func text() -> String {
       let encoding: String.Encoding!
       if let textEncodingName = response.textEncodingName {
         let cfe = CFStringConvertIANACharSetNameToEncoding(textEncodingName as CFString)
@@ -184,7 +184,7 @@ public enum HTTPRequest {
       } else {
         encoding = .utf8
       }
-      return String(data: data, encoding: encoding)
+      return String(data: data, encoding: encoding) ?? ""
     }
     
     public func json<T: Decodable>() throws -> T {
@@ -192,7 +192,14 @@ public enum HTTPRequest {
       return try decoder.decode(T.self, from: data)
     }
     
-    public func json<T: Decodable, D: TopLevelDecoder>(_ getDecoder: @escaping () -> D)  throws -> T where D.Input == Data {
+    /// decode to struct with custom decoder
+    /// - Parameter getDecoder function to get that decoder
+    /// - Returns: parsed struct
+    ///
+    ///  due to latest swift (5.7) cann't infer type from a default parameter ( https://forums.swift.org/t/generic-parameter-d-could-not-be-inferred/58696 )
+    ///       this method cann't be written in following pattern and replace the previous one
+    ///       `public func json<T: Decodable, D: TopLevelDecoder>(_ getDecoder: (() -> D) = { JSONDecoder() } )  throws -> T where D.Input == Data {`
+    public func json<T: Decodable, D: TopLevelDecoder>(decoder getDecoder: (() -> D) )  throws -> T where D.Input == Data {
       let decoder = getDecoder()
       return try decoder.decode(T.self, from: data)
     }
@@ -201,8 +208,6 @@ public enum HTTPRequest {
       data
     }
   }
-  
-  public typealias CustomDecoder = ( _ decoder: JSONDecoder) -> Void
   
   /// request with an url string
   ///
@@ -220,22 +225,29 @@ public enum HTTPRequest {
   /// ```
   ///
   /// - Returns: request result
-  public static func fetch(_ url: String) async throws -> Response {
-    guard let requestUrl = URL(string: url) else {
-      throw RequestError.invalidURL
+  public static func fetch(_ url: String, _ payload: Request? = nil) async throws -> Response {
+    var httpRequest: Request!
+    if let payload = payload {
+      httpRequest = payload
+      httpRequest.url = URL(string: url, relativeTo: httpRequest.url)
+    } else {
+      guard let requestUrl = URL(string: url) else {
+        throw RequestError.invalidURL
+      }
+      httpRequest = .init(url: requestUrl)
     }
-    return try await fetch(requestUrl)
-  }
-  
-  public static func fetch(_ url: String, _ payload: Request) async throws -> Response {
-    var httpRequest = payload
-    httpRequest.url = URL(string: url, relativeTo: httpRequest.url)
+    
     return try await fetch(httpRequest)
   }
   
-  public static func fetch(_ url: URL, _ payload: Request) async throws -> Response {
-    var httpRequest = payload
-    httpRequest.url = url
+  public static func fetch(_ url: URL, _ payload: Request? = nil) async throws -> Response {
+    var httpRequest: Request!
+    if let payload = payload {
+      httpRequest = payload
+      httpRequest.url = url
+    } else {
+      httpRequest = .init(url: url)
+    }
     return try await fetch(httpRequest)
   }
 
@@ -270,4 +282,63 @@ public enum HTTPRequest {
     let (data, response) = try await URLSession.shared.data(for: request)
     return Response(request: payload, data: data, response: response)
   }
+  
+  
+  /// get string response directly
+  /// - Parameters:
+  ///   - url: url string
+  ///   - payload: optional payload
+  /// - Returns: reponse body in string
+  public static func api(_ url: String, _ payload: Request? = nil) async throws -> String {
+    let resp = try await fetch(url, payload)
+    return resp.text()
+  }
+  
+  public static func api(_ url: URL, _ payload: Request? = nil) async throws -> String {
+    let resp = try await fetch(url, payload)
+    return resp.text()
+  }
+  
+  public static func api(_ payload: Request) async throws -> String {
+    let resp = try await fetch(payload)
+    return resp.text()
+  }
+  
+
+  /// get parsed JSON response
+  /// - Parameters:
+  ///   - url: url
+  ///   - payload: optional payload
+  /// - Returns: response body in parsed struct
+  public static func api<T: Decodable, D: TopLevelDecoder>(_ url: String, _ payload: Request? = nil, decoder getDecoder: (() -> D)) async throws -> T where D.Input == Data {
+    let resp = try await fetch(url, payload)
+    return try resp.json(decoder: getDecoder)
+  }
+  
+  public static func api<T: Decodable>(_ url: String, _ payload: Request? = nil) async throws -> T {
+    let resp = try await fetch(url, payload)
+    return try resp.json()
+  }
+
+  
+  public static func api<T: Decodable>(_ url: URL, _ payload: Request? = nil) async throws -> T {
+    let resp = try await fetch(url, payload)
+    return try resp.json()
+  }
+  public static func api<T: Decodable, D: TopLevelDecoder>(_ url: URL, _ payload: Request? = nil, decoder getDecoder: (() -> D)) async throws -> T where D.Input == Data {
+    let resp = try await fetch(url, payload)
+    return try resp.json(decoder: getDecoder)
+  }
+
+  
+  public static func api<T: Decodable>(_ payload: Request) async throws -> T {
+    let resp = try await fetch(payload)
+    return try resp.json()
+  }
+  public static func api<T: Decodable, D: TopLevelDecoder>(_ payload: Request, decoder getDecoder: (() -> D)) async throws -> T where D.Input == Data {
+    let resp = try await fetch(payload)
+    return try resp.json(decoder: getDecoder)
+  }
+
+
 }

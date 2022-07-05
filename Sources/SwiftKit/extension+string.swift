@@ -45,7 +45,7 @@ public extension String {
   ///
   /// ```swift
   /// let dateStr = "2021/12/12 23:45:32"
-  /// let date = dateStr.toDate("YYYY/MM/DD hh:mm:ss")
+  /// let date = dateStr.toDate(format: .format("YYYY/MM/DD hh:mm:ss"))
   /// ```
   /// - Parameter format: data format that string is using, like "YYYY/MM/DD
   /// - Returns: date instance
