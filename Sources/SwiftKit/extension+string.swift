@@ -91,4 +91,28 @@ public extension String {
     }
     return String(self[range])
   }
+  
+  /// get regexp matched part in a string
+  ///
+  /// ```swift
+  /// let str = "id90232323"
+  /// let id = str.getMatchedGroup(pattern: #"\/id(\d+)"#)
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - pattern: regexp pattern in string
+  ///   - options: regexp options
+  ///   - index: group index, starts from 1
+  /// - Returns: string matched in that index
+  func getMatchedGroup(pattern: String, options: NSRegularExpression.Options = [], index: Int = 1) -> String? {
+    guard let regexp = try? NSRegularExpression(pattern: pattern, options: options),
+          let matched = regexp.firstMatch(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count)) else {
+      return nil
+    }
+    
+    guard let range = Range(matched.range(at: index), in: self) else {
+      return nil
+    }
+    return String(self[range])
+  }
 }
