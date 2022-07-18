@@ -82,4 +82,9 @@ final class HttpRequestTests: XCTestCase {
     let dateString = meta.analyzedAt.toString(.format("EEEE, MMM d, yyyy", locale: "zh-TW"))
     XCTAssertNotEqual(dateString, "")
   }
+  
+  func testCrawlUrl() async throws {
+    let html = try await HTTPRequest.crawl("https://2022.ip138.com/")
+    XCTAssertTrue(!html.isEmpty, "should has content")
+  }
 }

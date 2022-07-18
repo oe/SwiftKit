@@ -357,7 +357,9 @@ public extension HTTPRequest {
   ///   should access it in a async queue, or it will crash your app
   static var currentUserAgent: String {
     if cachedUserAgent.isEmpty {
-      cachedUserAgent = WKWebView().value(forKey: "userAgent") as! String
+      DispatchQueue.main.sync {
+        cachedUserAgent = WKWebView().value(forKey: "userAgent") as! String
+      }
     }
     return cachedUserAgent
   }
