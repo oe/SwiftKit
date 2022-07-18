@@ -84,7 +84,9 @@ final class HttpRequestTests: XCTestCase {
   }
   
   func testCrawlUrl() async throws {
-    let html = try await HTTPRequest.crawl("https://2022.ip138.com/")
+//    let html = try await HTTPRequest.crawl("https://2022.ip138.com/")
+    let html = try await HTTPRequest.crawl("https://www.ip138.com/iplookup.asp?ip=115.44.3.105&action=2", responseEncoding: "gb2312")
+    print("HTML", html)
     XCTAssertTrue(!html.isEmpty, "should has content")
   }
 }

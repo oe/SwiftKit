@@ -278,9 +278,9 @@ public extension HTTPRequest {
       data
     }
 
-    public func text() -> String {
+    public func text(encoding customEncodingName: String? = nil) -> String {
       let encoding: String.Encoding!
-      if let textEncodingName = response.textEncodingName {
+      if let textEncodingName = (customEncodingName ?? response.textEncodingName) {
         let cfe = CFStringConvertIANACharSetNameToEncoding(textEncodingName as CFString)
         let se = CFStringConvertEncodingToNSStringEncoding(cfe)
         encoding = String.Encoding(rawValue: se)
@@ -370,19 +370,15 @@ public extension HTTPRequest {
   ///   - url: url
   ///   - referrer: referer string
   ///   - options: custom request payload
+  ///   - responseEncoding: custom response text encoding
   /// - Returns: html body
-  static func crawl(_ url: String? = nil, referrer: String? = nil, payload options: Request? = nil) async throws -> String {
+  static func crawl(_ url: String, referrer: String? = nil, payload options: Request? = nil, responseEncoding: String? = nil) async throws -> String {
     var request: Request!
     if options != nil {
       request = options!
-      if url != nil {
-        request.url = URL(string: url!, relativeTo: options!.url)
-      }
+      request.url = URL(string: url, relativeTo: options!.url)
     } else {
-      guard url != nil else {
-        throw RequestError.urlMissing
-      }
-      request = Request(url: URL(string: url!))
+      request = Request(url: URL(string: url))
     }
     var requestReferrer: String!
     if referrer == nil {
@@ -394,8 +390,7 @@ public extension HTTPRequest {
     } else {
       requestReferrer = referrer!
     }
-    
-    
+
     if request.headers != nil {
       if !request.headers!.contains(where: { $0.key.lowercased() == "user-agent"}) {
         request.headers!["User-Agent"] = currentUserAgent
@@ -404,12 +399,12 @@ public extension HTTPRequest {
     } else {
       request.headers = [
         "User-Agent": currentUserAgent,
-        "Referer": requestReferrer
+        "Referer": requestReferrer,
       ]
     }
     
     let response = try await fetch(request)
-    return response.text()
+    return response.text(encoding: responseEncoding)
   }
   
 }
