@@ -365,24 +365,45 @@ public extension HTTPRequest {
   
   /// crawl webpage with current use agent by default
   /// - Parameters:
-  ///   - url: url string
+  ///   - url: url
+  ///   - referrer: referer string
   ///   - options: custom request payload
   /// - Returns: html body
-  static func crawl(_ url: String, _ options: Request? = nil) async throws -> String {
+  static func crawl(_ url: String? = nil, referrer: String? = nil, payload options: Request? = nil) async throws -> String {
     var request: Request!
     if options != nil {
       request = options!
-      request.url = URL(string: url, relativeTo: options!.url)
+      if url != nil {
+        request.url = URL(string: url!, relativeTo: options!.url)
+      }
     } else {
-      request = Request(url: URL(string: url))
+      guard url != nil else {
+        throw RequestError.urlMissing
+      }
+      request = Request(url: URL(string: url!))
     }
+    var requestReferrer: String!
+    if referrer == nil {
+      guard let finalUrl = request.url,
+            let origin = finalUrl.origin else {
+        throw RequestError.urlMissing
+      }
+      requestReferrer = "\(origin)/"
+    } else {
+      requestReferrer = referrer!
+    }
+    
     
     if request.headers != nil {
       if !request.headers!.contains(where: { $0.key.lowercased() == "user-agent"}) {
         request.headers!["User-Agent"] = currentUserAgent
+        request.headers!["Referer"] = requestReferrer
       }
     } else {
-      request.headers = ["User-Agent": currentUserAgent]
+      request.headers = [
+        "User-Agent": currentUserAgent,
+        "Referer": requestReferrer
+      ]
     }
     
     let response = try await fetch(request)
