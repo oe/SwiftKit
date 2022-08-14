@@ -89,4 +89,11 @@ final class HttpRequestTests: XCTestCase {
     print("HTML", html)
     XCTAssertTrue(!html.isEmpty, "should has content")
   }
+  
+  func testQQZone() async throws {
+    let resp = try await HTTPRequest.fetch("https://users.qzone.qq.com/fcg-bin/cgi_get_portrait.fcg?uins=123456")
+    let text = resp.text(encoding: "GB18030")
+    print("text", text)
+    XCTAssertTrue(!text.isEmpty, "should have content")
+  }
 }

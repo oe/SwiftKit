@@ -6,7 +6,6 @@
 //
 import Combine
 import Foundation
-import WebKit
 
 public enum HTTPRequest {
 
@@ -348,11 +347,26 @@ public extension HTTPRequest {
   }
 }
 
+#if os(tvOS)
 /// extension for web crawler
 public extension HTTPRequest {
-  private static var cachedUserAgent = ""
+  static var cachedUserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"
   
   
+  /// current device userAgent
+  ///   should access it in a async queue, or it will crash your app
+  static var currentUserAgent: String {
+    cachedUserAgent
+  }
+}
+
+#else
+import WebKit
+
+/// extension for web crawler
+public extension HTTPRequest {
+  static var cachedUserAgent = ""
+
   /// current device userAgent
   ///   should access it in a async queue, or it will crash your app
   static var currentUserAgent: String {
@@ -363,7 +377,11 @@ public extension HTTPRequest {
     }
     return cachedUserAgent
   }
-  
+}
+#endif
+
+/// extension for web crawler
+public extension HTTPRequest {
   
   /// crawl webpage with current use agent by default
   /// - Parameters:
