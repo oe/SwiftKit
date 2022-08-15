@@ -7,7 +7,8 @@ let package = Package(
     name: "SwiftKit",
     platforms: [
       .macOS(.v12),
-      .iOS(.v15)
+      .iOS(.v15),
+      .tvOS(.v13)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
