@@ -60,6 +60,15 @@ public extension String {
     }
   }
   
+  func toJSON<T: Decodable>(encoding: String.Encoding = .utf8) throws -> T {
+    let decoder = JSONDecoder()
+    let data = self.data(using: encoding)
+    guard let data = data else {
+      throw SwiftKitError.runtimeError("unable to encoding with \(encoding)")
+    }
+    return try decoder.decode(T.self, from: data)
+  }
+  
   /// format for string that can convert to Date
   enum String2DateFormat {
     // standard iso8601 format

@@ -34,5 +34,20 @@ final class StringTests: XCTestCase {
     let compts = Calendar.current.dateComponents([.year, .month, .day], from: date!)
     XCTAssertTrue(compts.year == 2021)
   }
+  
+  func testToJSON() throws {
+    let str = """
+    {"name": "Xiu", "age": 21}
+    """
+    
+    let user: User = try str.toJSON()
+    print(user)
+    XCTAssert(user.age == 21)
+  }
+  
+  struct User: Codable {
+    let name: String
+    let age: Int
+  }
 
 }
