@@ -60,6 +60,19 @@ public extension String {
     }
   }
   
+  /// convert string to struct
+  ///
+  /// ```swift
+  /// struct User: Codable {
+  ///   let name: String
+  ///   let age: Int
+  /// }
+  /// let str = "{\"name\": \"Jack\", \"age\": 26}"
+  /// let user: User = try str.toJSON()
+  /// print(user.name)
+  /// ```
+  /// - Parameter encoding: string encoding name, default to .uft8
+  /// - Returns: parsed struct
   func toJSON<T: Decodable>(encoding: String.Encoding = .utf8) throws -> T {
     let decoder = JSONDecoder()
     let data = self.data(using: encoding)
