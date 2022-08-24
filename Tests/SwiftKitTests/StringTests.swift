@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import SwiftKit
 
 final class StringTests: XCTestCase {
 
