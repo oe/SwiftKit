@@ -50,5 +50,13 @@ final class StringTests: XCTestCase {
     let name: String
     let age: Int
   }
+  
+  func testMd5() throws {
+    XCTAssertTrue("a".md5 == "0cc175b9c0f1b6a831c399e269772661")
+  }
+  
+  func testSha1() throws {
+    XCTAssertTrue("bb".sha1 == "9a900f538965a426994e1e90600920aff0b4e8d2")
+  }
 
 }

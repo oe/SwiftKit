@@ -4,11 +4,10 @@
 //
 //  Created by Saiya Lee on 1/5/22.
 //
-
 import Foundation
+import CryptoKit
 
 public extension String {
-  
   /// check string contains parts of string, case insensitive
   ///
   /// ```swift
@@ -38,6 +37,25 @@ public extension String {
       
     }
     return total
+  }
+  
+  
+  /// string  sha1 hash string(40 letters)
+  var sha1: String {
+    let digest = Insecure.SHA1.hash(data: self.data(using: .utf8) ?? Data())
+    
+    return digest.map {
+      String(format: "%02hhx", $0)
+    }.joined()
+  }
+  
+  /// string md5 hash string(32 letters)
+  var md5: String {
+    let digest = Insecure.MD5.hash(data: self.data(using: .utf8) ?? Data())
+    
+    return digest.map {
+      String(format: "%02hhx", $0)
+    }.joined()
   }
   
   
