@@ -6,6 +6,6 @@
 //
 
 import Foundation
-enum SwiftKitError: Error {
+public enum SwiftKitError: Error {
   case runtimeError(String)
 }
