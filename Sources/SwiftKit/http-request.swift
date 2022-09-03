@@ -157,32 +157,35 @@ public extension HTTPRequest {
     /// request body (for post/put)
     public var body: Data?
     /// use json request, add accept/content-type header automaticlly
-    public var json: Bool?
+    public var encoder: Encoder?
     /// timeout in senconds, default to 60s internal
     public var timeout: TimeInterval?
     
     /// init with standard parameters
-    public init(url: URL? = nil, method: Method? = nil, qs: [String : String]? = nil, headers: [String : String]? = nil, body: Data? = nil, json: Bool? = nil, timeout: TimeInterval? = nil) {
+    public init(url: URL? = nil, method: Method? = nil, qs: [String : String]? = nil, headers: [String : String]? = nil, bodyData: Data? = nil, encoder: Encoder? = nil, timeout: TimeInterval? = nil) {
       self.url = url
       self.method = method
       self.qs = qs
       self.headers = headers
-      self.body = body
-      self.json = json
+      self.body = bodyData
+      self.encoder = encoder
       self.timeout = timeout
     }
     
     
     /// init with encodable body
-    public init<T: Encodable>(url: URL? = nil, method: Method? = nil, qs: [String : String]? = nil, headers: [String : String]? = nil, body: T? = nil, json: Bool? = nil, timeout: TimeInterval? = nil) throws {
-      if let body = body {
-        guard let bodyData = try? JSONEncoder().encode(body) else {
-          throw RequestError.malformedBody
-        }
-        self.init(url: url, method: method, qs: qs, headers: headers, body: bodyData, json: json, timeout: timeout)
-      } else {
-        self.init(url: url, method: method, qs: qs, headers: headers, body: nil, json: json, timeout: timeout)
+    public init<T: Encodable>(url: URL? = nil, method: Method? = nil, qs: [String : String]? = nil, headers: [String : String]? = nil, body: T, encoder: Encoder = .json, timeout: TimeInterval? = nil) throws {
+      let data: Data?
+      switch encoder {
+      case .json:
+        data = try JSONEncoder().encode(body)
+      case .form:
+        data = try URLEncodedFormEncoder().encode(body)
       }
+      guard let bodyData = data else {
+        throw RequestError.malformedBody
+      }
+      self.init(url: url, method: method, qs: qs, headers: headers, bodyData: bodyData, encoder: encoder, timeout: timeout)
     }
     
     /// convert to an URLRequest object which can be used in http request
@@ -211,15 +214,17 @@ public extension HTTPRequest {
         }
       }
       
-      let usingJson = json == true
-      
       if let body = self.body {
         urlRequest.httpBody = body
-        if usingJson {
-          urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        switch encoder {
+        case .json:
+          urlRequest.addValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
+        case .form:
+          urlRequest.addValue("application/x-www-form-urlencoded; charset=UTF-8", forHTTPHeaderField: "Content-Type")
+        case .none: break
         }
       }
-      if usingJson {
+      if encoder == .json {
         urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
       }
       
@@ -320,6 +325,12 @@ public extension HTTPRequest {
     case urlMissing
     case invalidURL
     case malformedBody
+  }
+  
+  /// body encoder
+  enum Encoder {
+    case form
+    case json
   }
 
   /// HTTP methods

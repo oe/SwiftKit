@@ -2,7 +2,7 @@ import XCTest
 import SwiftKit
 
 final class HttpRequestTests: XCTestCase {
-  struct IUserMeta: Decodable {
+  struct IUserMeta: Codable {
     var page: Int
     var per_page: Int
     var total: Int
@@ -95,5 +95,16 @@ final class HttpRequestTests: XCTestCase {
     let text = resp.text(encoding: "GB18030")
     print("text", text)
     XCTAssertTrue(!text.isEmpty, "should have content")
+  }
+  
+  func testPostJson() async throws {
+    let data: IUserMeta = .init(page: 10, per_page: 100, total: 20, total_pages: 2)
+    let resp: String = try await HTTPRequest.api("https://postman-echo.com/post", .init(
+      method: .POST,
+      body: data,
+      encoder: .json
+    ))
+    print(resp)
+    XCTAssertTrue(!resp.isEmpty)
   }
 }
