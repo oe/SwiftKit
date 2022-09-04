@@ -8,6 +8,9 @@ import Combine
 import Foundation
 
 public enum HTTPRequest {
+  
+  /// turn on to log debug info
+  public static var debugMode = false
 
   /// request with an url string
   ///
@@ -32,11 +35,13 @@ public enum HTTPRequest {
       httpRequest.url = URL(string: url, relativeTo: httpRequest.url)
     } else {
       guard let requestUrl = URL(string: url) else {
+        if debugMode {
+          debugPrint("[HTTPRequest]invalid url: \(url)")
+        }
         throw RequestError.invalidURL
       }
       httpRequest = .init(url: requestUrl)
     }
-    
     return try await fetch(httpRequest)
   }
   
@@ -78,9 +83,16 @@ public enum HTTPRequest {
   /// - Parameter payload: request params
   /// - Returns: string
   public static func fetch(_ payload: Request) async throws -> Response {
-    let request = try payload.toURLRequest()
-    let (data, response) = try await URLSession.shared.data(for: request)
-    return Response(request: payload, data: data, response: response)
+    do {
+      let request = try payload.toURLRequest()
+      let (data, response) = try await URLSession.shared.data(for: request)
+      return Response(request: payload, data: data, response: response)
+    } catch {
+      if debugMode {
+        debugPrint("[HTTPRequest] fetch failed", error)
+      }
+      throw error
+    }
   }
   
   
@@ -298,7 +310,14 @@ public extension HTTPRequest {
     
     public func json<T: Decodable>() throws -> T {
       let decoder = JSONDecoder()
-      return try decoder.decode(T.self, from: data)
+      do {
+        return try decoder.decode(T.self, from: data)
+      } catch {
+        if HTTPRequest.debugMode {
+          debugPrint("[HTTPRequest.Response] unable to decode to json", self.text())
+        }
+        throw error
+      }
     }
     
     /// decode to struct with custom decoder
@@ -310,7 +329,14 @@ public extension HTTPRequest {
     ///       `public func json<T: Decodable, D: TopLevelDecoder>(_ getDecoder: (() -> D) = { JSONDecoder() } )  throws -> T where D.Input == Data {`
     public func json<T: Decodable, D: TopLevelDecoder>(decoder getDecoder: (() -> D) )  throws -> T where D.Input == Data {
       let decoder = getDecoder()
-      return try decoder.decode(T.self, from: data)
+      do {
+        return try decoder.decode(T.self, from: data)
+      } catch {
+        if HTTPRequest.debugMode {
+          debugPrint("[HTTPRequest.Response] unable to decode to json", self.text())
+        }
+        throw error
+      }
     }
     
     public func blob() -> Data {
