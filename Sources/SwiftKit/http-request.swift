@@ -227,7 +227,9 @@ public extension HTTPRequest {
       if encoder == .json {
         urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
       }
-      
+      if let timeout = self.timeout {
+        urlRequest.timeoutInterval = timeout
+      }
       return urlRequest
     }
   }

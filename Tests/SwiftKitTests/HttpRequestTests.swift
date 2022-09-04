@@ -107,4 +107,16 @@ final class HttpRequestTests: XCTestCase {
     print(resp)
     XCTAssertTrue(!resp.isEmpty)
   }
+  
+  func testTimeout() async throws {
+    let start = Date().timeIntervalSince1970
+    do {
+      _ = try await HTTPRequest.api("https://postman-echo.com/post", .init(timeout: 2))
+      print("success")
+    } catch {
+      print("error", error)
+      let end = Date().timeIntervalSince1970
+      XCTAssertTrue(end - start <= 3.0, "should break in 2 seconds")
+    }
+  }
 }
