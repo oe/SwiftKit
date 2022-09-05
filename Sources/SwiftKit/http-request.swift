@@ -359,6 +359,7 @@ public extension HTTPRequest {
   enum Encoder {
     case form(_ charset: CharacterSet = .afURLQueryAllowed)
     case json
+    static let form = form(.afURLQueryAllowed)
   }
 
   /// HTTP methods
