@@ -357,7 +357,7 @@ public extension HTTPRequest {
   
   /// body encoder
   enum Encoder {
-    case form(charset: CharacterSet = .afURLQueryAllowed)
+    case form(_ charset: CharacterSet = .afURLQueryAllowed)
     case json
   }
 
