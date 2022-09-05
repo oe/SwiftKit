@@ -119,4 +119,14 @@ final class HttpRequestTests: XCTestCase {
       XCTAssertTrue(end - start <= 3.0, "should break in 2 seconds")
     }
   }
+  
+  func testStringEncode() {
+//    encodeURIComponent('https://v.youku.com/v_show/id_XNTg4MDUzMzU1Ng==.html').length
+    let str = "https://aaa:ccc@v.youku.com/v_show/id_XNTg4MDUzMzU1Ng==.html"
+
+    let encoded = str.addingPercentEncoding(withAllowedCharacters: .afURLQueryAllowed)!
+//    let encoded = str.addingPercentEncoding(withAllowedCharacters: NSMutableCharacterSet.urlQueryAllowed)!
+    print(encoded)
+    XCTAssertTrue(!encoded.isEmpty)
+  }
 }

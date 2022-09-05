@@ -191,8 +191,8 @@ public extension HTTPRequest {
       switch encoder {
       case .json:
         data = try JSONEncoder().encode(body)
-      case .form:
-        data = try URLEncodedFormEncoder().encode(body)
+      case .form(let charset):
+        data = try URLEncodedFormEncoder(allowedCharacters: charset).encode(body)
       }
       guard let bodyData = data else {
         throw RequestError.malformedBody
@@ -233,10 +233,10 @@ public extension HTTPRequest {
           urlRequest.addValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
         case .form:
           urlRequest.addValue("application/x-www-form-urlencoded; charset=UTF-8", forHTTPHeaderField: "Content-Type")
-        case .none: break
+        default: break
         }
       }
-      if encoder == .json {
+      if case .json = encoder {
         urlRequest.addValue("application/json", forHTTPHeaderField: "Accept")
       }
       if let timeout = self.timeout {
@@ -357,7 +357,7 @@ public extension HTTPRequest {
   
   /// body encoder
   enum Encoder {
-    case form
+    case form(charset: CharacterSet = .afURLQueryAllowed)
     case json
   }
 
