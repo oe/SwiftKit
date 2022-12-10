@@ -47,7 +47,7 @@ final class HttpRequestTests: XCTestCase {
       })
       return decoder
     }
-    let dateString = meta.analyzedAt.toString(.format("EEEE, MMM d, yyyy", locale: "zh-TW"))
+    let dateString = meta.analyzedAt.toString(.format("EEEE, MMM d, yyyy", locale: Locale(identifier: "zh-TW")))
     XCTAssertNotEqual(dateString, "")
   }
   
@@ -79,7 +79,7 @@ final class HttpRequestTests: XCTestCase {
       })
       return decoder
     }
-    let dateString = meta.analyzedAt.toString(.format("EEEE, MMM d, yyyy", locale: "zh-TW"))
+    let dateString = meta.analyzedAt.toString(.format("EEEE, MMM d, yyyy", locale: Locale(identifier: "zh-TW")))
     XCTAssertNotEqual(dateString, "")
   }
   
